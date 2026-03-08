@@ -223,7 +223,6 @@ Remove-Item -Recurse -Force $env:USERPROFILE\.claw2wp
 
 - [功能一览与命令速查](docs/FEATURES.md)
 - [REST API 与 Gutenberg 说明](docs/REST_API.md)
-- [PRD / 开发说明](PRD.md)
 
 ---
 
