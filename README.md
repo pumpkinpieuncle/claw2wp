@@ -1,6 +1,6 @@
 # Claw2WP
 
-用命令行把 **Markdown (.md) / Word (.docx)** 发布到 WordPress，支持 **Gutenberg 块格式**、WooCommerce 产品、更新/删除、批量发布与 CSV 导出。参考 [md2wp](https://github.com/TeamNickHart/md2wp)，功能更全。
+用命令行把 **Markdown (.md) / Word (.docx)** 发布到 WordPress，支持 **Gutenberg 块格式**、WooCommerce 产品、更新/删除、批量发布与 CSV 导出。可以管理多站点。
 
 - **输入**：`.md`、`.docx`
 - **输出**：WordPress 文章或 WooCommerce 产品，正文为 Gutenberg 块（段落、标题、图片、列表等）
@@ -60,7 +60,7 @@ claw2wp --help
 claw2wp init
 ```
 
-会在 **`~/.claw2wp/config.json`** 生成示例配置。编辑该文件，填入站点与凭证：
+会在 **`~/.claw2wp/config.json`** 生成示例配置。编辑该文件，填入站点与凭证，下方可以填入更多站点信息：
 
 ```json
 {
