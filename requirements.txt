@@ -1,0 +1,7 @@
+requests
+python-frontmatter
+markdown
+mammoth
+beautifulsoup4
+html2text
+mistletoe
