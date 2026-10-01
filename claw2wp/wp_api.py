@@ -106,39 +106,47 @@ class WPApi:
             print(f"获取标签列表异常: {e}")
         return []
 
-    def resolve_wp_category_ids(self, names):
-        """将分类名称（或 slug）解析为 wp/v2 的 category ID 列表。"""
+    @staticmethod
+    def _resolve_taxonomy_ids(names, get_terms):
+        """支持整数 ID 与名称/slug；数字字符串仍按名称解析。"""
         if not names:
             return []
         if isinstance(names, str):
-            names = [n.strip() for n in names.split(',') if n.strip()]
-        names = [n.strip() for n in names if n]
-        categories = self.get_wp_categories()
+            names = names.split(',')
+        values = []
+        for value in names:
+            if isinstance(value, bool):
+                continue
+            if isinstance(value, int):
+                values.append(value)
+            elif isinstance(value, str) and value.strip():
+                values.append(value.strip())
+
+        # 整数无需请求 taxonomy 列表，名称沿用现有匹配规则。
+        terms = get_terms() if any(isinstance(v, str) for v in values) else []
         ids = []
-        for name in names:
-            name_lower = name.lower()
-            for c in categories:
-                if c.get('name') == name or c.get('slug', '').lower() == name_lower:
-                    ids.append(c['id'])
-                    break
+        seen = set()
+        for value in values:
+            if isinstance(value, str):
+                name_lower = value.lower()
+                for term in terms:
+                    if term.get('name') == value or term.get('slug', '').lower() == name_lower:
+                        value = term['id']
+                        break
+                else:
+                    continue
+            if value not in seen:
+                seen.add(value)
+                ids.append(value)
         return ids
 
+    def resolve_wp_category_ids(self, names):
+        """将整数 ID、分类名称或 slug 解析为去重的 category ID 列表。"""
+        return self._resolve_taxonomy_ids(names, self.get_wp_categories)
+
     def resolve_wp_tag_ids(self, names):
-        """将标签名称（或 slug）解析为 wp/v2 的 tag ID 列表。"""
-        if not names:
-            return []
-        if isinstance(names, str):
-            names = [n.strip() for n in names.split(',') if n.strip()]
-        names = [n.strip() for n in names if n]
-        tags = self.get_wp_tags()
-        ids = []
-        for name in names:
-            name_lower = name.lower()
-            for t in tags:
-                if t.get('name') == name or t.get('slug', '').lower() == name_lower:
-                    ids.append(t['id'])
-                    break
-        return ids
+        """将整数 ID、标签名称或 slug 解析为去重的 tag ID 列表。"""
+        return self._resolve_taxonomy_ids(names, self.get_wp_tags)
 
     def get_wc_categories(self):
         """GET wc/v3/products/categories，用于 WooCommerce 产品分类。"""
@@ -154,21 +162,8 @@ class WPApi:
         return []
 
     def resolve_wc_category_ids(self, names):
-        """将名称解析为 WooCommerce 产品分类 ID 列表。"""
-        if not names:
-            return []
-        if isinstance(names, str):
-            names = [n.strip() for n in names.split(',') if n.strip()]
-        names = [n.strip() for n in names if n]
-        categories = self.get_wc_categories()
-        ids = []
-        for name in names:
-            name_lower = name.lower()
-            for c in categories:
-                if c.get('name') == name or c.get('slug', '').lower() == name_lower:
-                    ids.append(c['id'])
-                    break
-        return ids
+        """将整数 ID、名称或 slug 解析为去重的 WooCommerce 分类 ID 列表。"""
+        return self._resolve_taxonomy_ids(names, self.get_wc_categories)
 
     # ------------------------- Posts (wp/v2/posts) -------------------------
 
